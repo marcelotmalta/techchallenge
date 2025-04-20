@@ -6,3 +6,5 @@ pandas
 openpyxl
 sqlalchemy
 unidecode
+python-multipart
+python-jose[cryptography]
