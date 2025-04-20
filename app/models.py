@@ -1,5 +1,5 @@
-
-from sqlalchemy import Column, Integer, String, Float, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Float, DateTime, UniqueConstraint
+from datetime import datetime
 from app.database import Base
 
 class Producao(Base):
@@ -54,3 +54,13 @@ class Exportacao(Base):
     ano = Column(Integer, index=True)
     quantidade = Column(Float)
     valor_usd = Column(Float)
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    senha = Column(String)
+    status = Column(String, default="pendente")  # pendente, aprovado, rejeitado
+    ultimo_token = Column(String, nullable=True)
+    data_token = Column(DateTime, nullable=True, default=datetime.utcnow)
