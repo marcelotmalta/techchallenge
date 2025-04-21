@@ -8,7 +8,7 @@ __pycache__/
 *.pyc
 
 # Bases de dados locais
-*.db
+#*.db
 *.sqlite3
 
 # Arquivos temporários
