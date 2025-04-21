@@ -12,18 +12,16 @@ uvicorn app.main:app --reload
 ```
 
 #Estrutura do projeto
+```
 tech_challenge/
-app/
+├──app/
 ├── __init__.py                     # Inicializador do pacote
 ├── analytics.py                    # Endpoints para análises futuras (ex: previsão, tendências)
-├── auth_extended.py                # Lógica de autenticação via JWT com fluxo de aprovação
 ├── auth_token.py                   # Validação de tokens JWT para proteger endpoints
 ├── config.py                       # Configurações globais da aplicação (secret key, expiração, etc.)
 ├── database.py                     # Inicialização do SQLAlchemy e conexão com SQLite
 ├── models.py                       # Modelos de dados SQLAlchemy (produção, usuários, etc.)
 ├── routes.py                       # Organização principal dos endpoints e routers
-├── routes_protegido_jwt.py         # Versão alternativa com autenticação em todos os GETs
-├── routes_com_auth_extendido.py    # Versão alternativa com rotas de autenticação estendida
 ├── routes_analytics_integrado.py   # Versão completa incluindo endpoints analíticos
 ├── scraper.py                      # Scraper principal para produção, comercialização, processamento
 ├── scraper_import_export.py        # Scraper específico para importações e exportações
@@ -32,7 +30,7 @@ app/
 ├── requirements.txt          # Dependências do projeto
 ├── README.md                 # Instruções do projeto
 └── .gitignore                # Ignora arquivos desnecessários
-
+```
 
 
 ## 🧭 Plano Arquitetural do Projeto
@@ -62,20 +60,6 @@ Este projeto foi estruturado com foco em modularidade, escalabilidade e seguran�
 
 ---
 
-### 🧩 Módulos e responsabilidades
-
-| Módulo                     | Responsabilidade                                                                 |
-|----------------------------|----------------------------------------------------------------------------------|
-| `scraper.py`               | Coleta e transforma dados de produção, comercialização e processamento          |
-| `scraper_import_export.py` | Trata arquivos com estrutura de colunas duplicadas (importação/exportação)      |
-| `models.py`                | Modelos de dados com validação e restrições de unicidade via SQLAlchemy         |
-| `database.py`              | Inicialização da conexão SQLite                                                 |
-| `auth_extended.py`         | Fluxo de autenticação com solicitação, aprovação e geração de token JWT         |
-| `auth_token.py`            | Validação e exigência de token para proteção de endpoints                       |
-| `routes.py`                | Organização dos endpoints em grupos lógicos                                     |
-| `analytics.py`             | Estrutura inicial para endpoints analíticos futuros (previsão, tendências etc)  |
-
----
 
 ### 🔐 Segurança
 
@@ -85,15 +69,112 @@ Este projeto foi estruturado com foco em modularidade, escalabilidade e seguran�
 
 ---
 
+
+## 🧱 Estrutura das Tabelas
+
+Abaixo estão os principais modelos de dados utilizados no banco (via SQLAlchemy), com suas respectivas funções e campos:
+
+---
+
+### 📦 `producao`
+Armazena dados históricos de produção de uvas por tipo de produto e ano.
+
+| Campo              | Tipo     | Descrição                            |
+|--------------------|----------|----------------------------------------|
+| `id`               | Integer  | Identificador único (autoincremento)  |
+| `id_original`      | Integer  | ID da fonte original do dado          |
+| `control`          | String   | Identificador de controle da Embrapa  |
+| `produto`          | String   | Tipo de produto vitivinícola          |
+| `ano`              | Integer  | Ano da produção                       |
+| `producao_toneladas` | Float | Quantidade produzida em toneladas     |
+
+🔐 Restrição: cada `(id_original, ano)` deve ser único.
+
+---
+
+### 💼 `comercializacao`
+Registra o volume de comercialização dos produtos vitivinícolas por ano.
+
+| Campo                  | Tipo     | Descrição                             |
+|------------------------|----------|-----------------------------------------|
+| `id`                   | Integer  | Identificador único                    |
+| `id_original`          | Integer  | ID da fonte original                   |
+| `control`              | String   | Código de controle                     |
+| `produto`              | String   | Tipo de produto                        |
+| `ano`                  | Integer  | Ano da comercialização                 |
+| `volume_comercializado`| Float    | Volume comercializado (litros/toneladas) |
+
+🔐 Restrição: cada `(id_original, ano)` deve ser único.
+
+---
+
+### 🏭 `processamento`
+Registra o volume de uvas processadas por cultivar e ano.
+
+| Campo                    | Tipo     | Descrição                             |
+|--------------------------|----------|-----------------------------------------|
+| `id`                     | Integer  | Identificador único                    |
+| `id_original`            | Integer  | ID da fonte original                   |
+| `control`                | String   | Código de controle                     |
+| `cultivar`               | String   | Tipo da uva                            |
+| `ano`                    | Integer  | Ano do processamento                   |
+| `volume_processado_litros` | Float  | Volume processado em litros            |
+
+🔐 Restrição: cada `(id_original, ano)` deve ser único.
+
+---
+
+### 🌎 `importacao`
+Contém dados de importação de vinhos por país e ano.
+
+| Campo         | Tipo     | Descrição                              |
+|---------------|----------|------------------------------------------|
+| `id`          | Integer  | Identificador único                     |
+| `pais`        | String   | Nome do país de origem                  |
+| `ano`         | Integer  | Ano da importação                       |
+| `quantidade`  | Float    | Quantidade importada                   |
+| `valor_usd`   | Float    | Valor total em dólares                 |
+
+🔐 Restrição: cada `(pais, ano)` deve ser único.
+
+---
+
+### 🌍 `exportacao`
+Semelhante à `importacao`, mas referente às exportações por país e ano.
+
+| Campo         | Tipo     | Descrição                              |
+|---------------|----------|------------------------------------------|
+| `id`          | Integer  | Identificador único                     |
+| `pais`        | String   | Nome do país de destino                 |
+| `ano`         | Integer  | Ano da exportação                       |
+| `quantidade`  | Float    | Quantidade exportada                   |
+| `valor_usd`   | Float    | Valor total em dólares                 |
+
+🔐 Restrição: cada `(pais, ano)` deve ser único.
+
+---
+
+### 👤 `usuarios`
+Controla os acessos à API via autenticação com aprovação por administrador.
+
+| Campo          | Tipo     | Descrição                              |
+|----------------|----------|------------------------------------------|
+| `id`           | Integer  | Identificador único                    |
+| `username`     | String   | Nome do usuário                        |
+| `senha`        | String   | Senha do usuário                       |
+| `status`       | String   | `pendente`, `aprovado` ou `rejeitado` |
+| `ultimo_token` | String   | Último token gerado (JWT)              |
+| `data_token`   | DateTime | Data da última geração de token        |
+
+
+---
+
 ### 🔮 Escalabilidade futura
 
 - Já estruturado para receber modelos de previsão (ML)
 - Modularidade para substituição de SQLite por PostgreSQL
 - Suporte a deploy em nuvem com Docker ou Vercel
 
-
-# API Vitivinícola
----
 
 ## 🔮 Funcionalidades futuras planejadas
 
