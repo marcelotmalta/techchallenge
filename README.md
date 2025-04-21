@@ -3,11 +3,13 @@
 
 API desenvolvida com FastAPI para consultar dados públicos de vitivinicultura da Embrapa. Esta API servirá como base de ingestão de dados para um futuro modelo de Machine Learning.
 
+O projeto está disponibilizado no Render através do endereço: https://techchallenge-ai7z.onrender.com/docs#/
+
 ## Como rodar localmente
 
 ```bash
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 
 ```
 
@@ -29,6 +31,8 @@ tech_challenge/
 │
 ├── requirements.txt          # Dependências do projeto
 ├── README.md                 # Instruções do projeto
+├── main.py                   # comandos de inicialização do projeto
+├── Procfile                  # comando de inicialização para o render
 └── .gitignore                # Ignora arquivos desnecessários
 ```
 
